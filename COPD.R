@@ -29,8 +29,6 @@ library(hexbin)
 
 
 ### Import 10x dataset as a seurat object
-
-
 data_dir <- '~/Analysis/COPD/JK01'
 list.files(data_dir) # Should show barcodes.tsv, genes.tsv, and matrix.mtx
 expression_matrix1 <- Read10X(data.dir = data_dir)
@@ -222,11 +220,6 @@ plot_grid(tp3, tp4)
 DimPlot(COPD, reduction = "tsne", group.by = "Class", cols = colclass)
 
 
-### save dataset
-saveRDS(COPD, file = "COPD.rds")
-
-
-
 
 #### Density plot
 COPD.Dim = DimPlot(COPD, reduction = "tsne")
@@ -242,5 +235,52 @@ image(rd)
 contour(rd)
 
 
+
+### Find marker genes in each subpopulations
+ST.markers <- FindAllMarkers(COPD, only.pos = TRUE, min.pct = 0.25, logfc.threshold = 0.5, test.use = "wilcox")
+saveRDS(ST.markers, file = "ST.markers.rds")
+write.table(ST.markers, file = 'ALLMarker-genes.tsv', sep='	')
+
+
+new.cluster.ids <- c("T-Cell", "Endothelium", "NKT/Cytotoxic T-Cell", "Neutorophils", "Macrophage", "T2 Alveolar Cell", "Fibroblast", "Mast Cell", "DC", 
+					"Activated Endothelium", "Cliated Cell", "T1 Alveolar Cell", "Club Cell", "B-Cell", "Smooth muscle", "FOXN4+ Cell-like", "Unknown")
+names(new.cluster.ids) <- levels(COPD)
+COPD <- RenameIdents(COPD, new.cluster.ids)
+
+DimPlot(COPD, label = TRUE, pt.size = 0.5) + NoLegend()
+
+
+### save dataset
+saveRDS(COPD, file = "COPD.rds")
+
+
+
+
+### Extraction of Epithelial subpopulations
+sel = c("T1 Alveolar Cell", "T2 Alveolar Cell", "Cliated Cell", "Club Cell")
+
+EPI = subset(COPD, ident = sel)
+
+EPI <- FindNeighbors(EPI, dims = 1:15)
+EPI <- FindClusters(EPI, resolution = 0.99)
+EPI <- RunTSNE(EPI, dims = 1:75)
+
+colpall = primary.colors(21)
+colpall = sample(colpall)
+DimPlot(EPI, reduction = "tsne", cols = colpall)
+DimPlot(EPI, reduction = "tsne", cols = colpall) + NoLegend()
+
+colclass = c("red3", "deepskyblue3", "chocolate1")
+DimPlot(EPI, reduction = "tsne", group.by = "Class", cols = colclass) + NoLegend()
+
+
+
+EPI.markers <- FindAllMarkers(EPI, only.pos = TRUE, min.pct = 0.25, logfc.threshold = 0.5, test.use = "wilcox")
+saveRDS(EPI.markers, file = "EPI.markers.rds")
+write.table(EPI.markers, file = 'EPIMarker-genes.tsv', sep='	')
+
+
+
+saveRDS(EPI, file = "EPI.rds")
 
 
