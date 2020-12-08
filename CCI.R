@@ -200,3 +200,18 @@ write.table(BtoA, file = "CCI-interaction-score-BtoA.txt", sep = "	")
 write.table(AtoB.CCI, file = "CCI-interaction-score-AtoB-CELL.txt", sep = "	")
 write.table(BtoA.CCI, file = "CCI-interaction-score-BtoA-CELL.txt", sep = "	")
 
+
+
+### Draw circos plot
+
+#> head(data)
+#   LigandCell ReceptorCell CCIscore.sum
+#1 Arteries_EC        AT1-1    0.5523612
+#2 Arteries_EC        AT2-7    0.3719545
+#3 Arteries_EC        AT1-2    0.6276795
+#4 Arteries_EC        AT2-6    0.2278950
+#5 Arteries_EC   Ciliated-2    0.5344556
+#6 Arteries_EC        AT1-3    0.4777029
+
+chordDiagram(data, col = ifelse(data$CCIscore.sum > 0, "red", "blue"))
+
