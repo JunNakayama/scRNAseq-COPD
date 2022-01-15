@@ -297,3 +297,37 @@ saveRDS(EPI, file = "EPI.rds")
 
 
 
+# GWAS analysis
+
+gene = read.delim("COPD_GWASgene.txt", header = FALSE)
+gene = unlist(gene)
+
+GWAS = EPI[unique(gene),]
+
+
+Org = unique(GWAS@active.ident)
+Org = as.factor(sort(Org))
+Cls = unique(GWAS@meta.data$Class)
+
+matlist = list()
+
+for(i in 1:length(Org)){
+	cl = Org[i]
+	clcl = subset(GWAS, ident = cl)
+	Idents(object = clcl) <- clcl@meta.data$Class
+	avelist = AverageExpression(clcl)
+	avelist = data.frame(avelist)
+
+	matlist[i] = list(avelist)
+}
+names(matlist) = Org
+
+sink("GWASmat.txt")
+matlist
+sink()
+
+
+
+
+
+
