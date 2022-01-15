@@ -192,13 +192,19 @@ JackStrawPlot(COPD, dims = 1:15)
 ElbowPlot(COPD)
 
 
+## Integration
+library(harmony)
+COPD <- RunHarmony(COPD, "orig.ident")
+
 
 ### find Cluster
-COPD <- FindNeighbors(COPD, dims = 1:15)
-COPD <- FindClusters(COPD, resolution = 0.2)
+COPD <- FindNeighbors(COPD, dims = 1:15, reduction = "harmony")
+COPD <- FindClusters(COPD, resolution = 1)
 
 ### tSNE
-COPD <- RunTSNE(COPD, dims = 1:75)
+COPD <- RunTSNE(COPD, reduction = "harmony", dims = 1:75)
+COPD <- RunUMAP(COPD, reduction = "harmony", dims = 1:30, min.dist = 0.5)
+
 
 DimPlot(COPD, label = TRUE, label.size = 10, reduction = "tsne") + NoLegend()
 
@@ -233,6 +239,8 @@ plot(bin, main = "", colramp = mCols, legend = FALSE)
 rd = kde2d(mat[,1], mat[,2], n = 2700)
 image(rd)
 contour(rd)
+
+
 
 
 
@@ -285,94 +293,6 @@ saveRDS(EPI, file = "EPI.rds")
 
 
 
-
-
-### Cell number count
-Pat.ident = data.frame(CellType = COPD@active.ident, Patient = COPD$old.ident, seurat_clusters = COPD@meta.data$seurat_clusters, Class = COPD@meta.data$Class)
-
-Pat = unique(COPD$old.ident)
-
-Patcount = list()
-res = NULL
-ex = NULL
-
-for(i in 1: length(Pat)){
-	P <- Pat[i]
-	ex = Pat.ident[Pat.ident$Patient == P,]
-	res = summary(ex$CellType)
-	Patcount[[i]] = res
-}
-names(Patcount) = Pat
-
-write.table(Patcount, file = "Patient-count.tsv", sep = "	")
-
-
-
-
-### Cell cycle
-Org = unique(COPD@active.ident)
-Cls = unique(COPD@meta.data$Class)
-
-CC.ident = data.frame(CellType = COPD@active.ident, Phase = COPD@meta.data$Phase, seurat_clusters = COPD@meta.data$seurat_clusters, Class = COPD@meta.data$Class)
-
-sumcount = list()
-sumcount2 = list()
-sumcountCOPD = list()
-sumcountsmo = list()
-sumcountnos = list()
-res = NULL
-ex = NULL
-ex2 = NULL
-
-for(i in 1: length(Org)){
-	cell <- Org[i]
-	ex = CC.ident[CC.ident$CellType == cell,]
-	res = summary(ex$Phase)
-	sumcount[[i]] = res
-}
-names(sumcount) = Org
-
-for(i in 1: length(Cls)){
-	Tis <- Cls[i]
-	ex = CC.ident[CC.ident$Class == Tis,]
-	res = summary(ex$Phase)
-	sumcount2[[i]] = res
-}
-names(sumcount2) = Cls
-
-
-for(i in 1: length(Cls)){
-	Tis <- Cls[i]
-	ex = CC.ident[CC.ident$Class == Tis,]
-		
-		for(i in 1: length(Org)){
-			cell <- Org[i]
-			ex2 = ex[ex$CellType == cell,]
-			res = summary(ex2$Phase)
-			
-				if(Tis == "COPD"){
-					sumcountCOPD[[i]] = res
-
-					}else if(Tis == "Smoker"){
-						sumcountsmo[[i]] = res
-						
-						}else{
-							sumcountnos[[i]] = res
-							}
-
-		}
-}
-names(sumcountCOPD) = Org
-names(sumcountsmo) = Org
-names(sumcountnos) = Org
-
-
-write.table(sumcount, file = "CellCycle-COPD-celltype.tsv", sep = "	")
-write.table(sumcount2, file = "CellCycle-COPD-class.tsv", sep = "	")
-
-write.table(sumcountCOPD, file = "CellCycle-COPD.tsv", sep = "	")
-write.table(sumcountsmo, file = "CellCycle-Smoker.tsv", sep = "	")
-write.table(sumcountnos, file = "CellCycle-NonSmoker.tsv", sep = "	")
 
 
 
