@@ -14,7 +14,7 @@ Figshare https://figshare.com/articles/dataset/Single-cell_Transcriptome_Analysi
 medRxiv https://www.medrxiv.org/content/10.1101/2020.12.03.20242412v1
 
 
-This project has been published in American Journal of Respirtory Cell and Molecular Biology.
+This project has been published in American Journal of Respiratory Cell and Molecular Biology.
 https://pubmed.ncbi.nlm.nih.gov/36108172/
 
 
